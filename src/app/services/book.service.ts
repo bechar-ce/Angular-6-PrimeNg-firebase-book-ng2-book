@@ -5,14 +5,23 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { IResponse, IBookDetails, Idata } from '../models/viewModels';
 
-@Injectable()
-export class BookService {
-    constructor(private db: AngularFireDatabase, private httpc: HttpClient) { }
-    getPosts(): Observable<Idata[]> {
-        return this.httpc.get<Idata[]>('https://jsonplaceholder.typicode.com/posts');
+@Injectable({ providedIn: 'root' })
+export class BookService implements IBookService {
+    getPosts: () => Observable<Idata[]>;
+    getBooksFromFirebase: () => Observable<IBookDetails[]>;
+    getBooksFromJSON: () => Observable<IBookDetails[]>;
+    constructor(private db: AngularFireDatabase, private httpc: HttpClient) {
+        this.getPosts = () => {
+            return this.httpc.get<Idata[]>('https://jsonplaceholder.typicode.com/posts');
+        };
+
+        this.getBooksFromFirebase = () => {
+            return this.db.list<IBookDetails>('books').valueChanges();
+        };
+
+        this.getBooksFromJSON = () => {
+            return this.httpc.get<IBookDetails[]>('api/books-json.json');
+        };
     }
 
-    getBooks(): Observable<IBookDetails[]> {
-        return this.db.list<IBookDetails>('books').valueChanges();
-    }
 }
